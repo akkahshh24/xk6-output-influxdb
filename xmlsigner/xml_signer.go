@@ -13,14 +13,19 @@ import (
 	dsig "github.com/akkahshh24/go-xml-signer"
 	"github.com/beevik/etree"
 	"github.com/brianvoe/gofakeit/v6"
+	"go.k6.io/k6/js/modules"
 	"golang.org/x/crypto/pkcs12"
 )
+
+func init() {
+	modules.Register("k6/x/xmlsigner", new(XmlSigner))
+}
 
 type XmlSigner struct {
 	PrivateKey crypto.Signer
 	CertBytes  []byte
-	SignedXml  string
-	TxnId      string
+	// SignedXml  string
+	// TxnId      string
 }
 
 func (x *XmlSigner) GetPrivateKeyAndCert(p12FilePath, password string) {
@@ -52,7 +57,7 @@ func (x *XmlSigner) GetPrivateKeyAndCert(p12FilePath, password string) {
 	x.CertBytes = certPEMBytes
 }
 
-func (x *XmlSigner) GetSignedXml(payload string) {
+func (x *XmlSigner) GetSignedXml(payload string) (string, string) {
 
 	doc := etree.NewDocument()
 	if err := doc.ReadFromString(payload); err != nil {
@@ -62,8 +67,8 @@ func (x *XmlSigner) GetSignedXml(payload string) {
 	doc.Root().SelectElement("Head").SelectAttr("msgId").Value = gofakeit.Regex(`^[a-zA-Z0-9]{35}$`)
 	doc.Root().SelectElement("Head").SelectAttr("ts").Value = time.Now().Format("2006-01-02T15:04:05.000-07:00")
 	doc.Root().SelectElement("Txn").SelectAttr("custRef").Value = gofakeit.Regex(`^[0-9]{12}$`)
-	x.TxnId = gofakeit.Regex(`^[a-zA-Z0-9]{35}$`)
-	doc.Root().SelectElement("Txn").SelectAttr("id").Value = x.TxnId
+	txnId := gofakeit.Regex(`^[a-zA-Z0-9]{35}$`)
+	doc.Root().SelectElement("Txn").SelectAttr("id").Value = txnId
 	doc.Root().SelectElement("Txn").SelectAttr("refId").Value = gofakeit.Regex(`^[0-9]{6}$`)
 	doc.Root().SelectElement("Txn").SelectAttr("ts").Value = time.Now().Format("2006-01-02T15:04:05.000-07:00")
 
@@ -80,5 +85,6 @@ func (x *XmlSigner) GetSignedXml(payload string) {
 		log.Fatalf("failed to write payload to string: %v", err)
 	}
 
-	x.SignedXml = str
+	// x.SignedXml = str
+	return str, txnId
 }

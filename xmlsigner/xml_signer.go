@@ -1,26 +1,21 @@
-// xk6 build latest --with github.com/akkahshh24/xk6-xml-signer@v0.0.7 --with github.com/grafana/xk6-output-influxdb@latest --output k6-xmlsigner-influxdb
-
 package xmlsigner
 
 import (
 	"crypto"
 	"crypto/rsa"
-	"encoding/pem"
 	"log"
 	"os"
 	"time"
 
-	dsig "github.com/akkahshh24/go-xml-signer"
 	"github.com/beevik/etree"
 	"github.com/brianvoe/gofakeit/v6"
+	dsig "github.com/russellhaering/goxmldsig"
 	"golang.org/x/crypto/pkcs12"
 )
 
 type XmlSigner struct {
 	PrivateKey crypto.Signer
 	CertBytes  []byte
-	// SignedXml  string
-	// TxnId      string
 }
 
 func (x *XmlSigner) GetPrivateKeyAndCert(p12FilePath, password string) {
@@ -41,15 +36,8 @@ func (x *XmlSigner) GetPrivateKeyAndCert(p12FilePath, password string) {
 
 	signer := crypto.Signer(rsaPrivateKey)
 
-	certPEM := &pem.Block{
-		Type:  "CERTIFICATE",
-		Bytes: cert.Raw,
-	}
-
-	certPEMBytes := pem.EncodeToMemory(certPEM)
-
 	x.PrivateKey = signer
-	x.CertBytes = certPEMBytes
+	x.CertBytes = cert.Raw
 }
 
 func (x *XmlSigner) GetSignedXml(payload string) (string, string) {
@@ -80,6 +68,5 @@ func (x *XmlSigner) GetSignedXml(payload string) (string, string) {
 		log.Fatalf("failed to write payload to string: %v", err)
 	}
 
-	// x.SignedXml = str
 	return str, txnId
 }

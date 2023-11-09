@@ -56,6 +56,9 @@ func (x *XmlSigner) GetSignedXml(payload string) (string, string) {
 	doc.Root().SelectElement("Txn").SelectAttr("ts").Value = time.Now().Format("2006-01-02T15:04:05.000-07:00")
 
 	ctx, _ := dsig.NewSigningContext(x.PrivateKey, [][]byte{x.CertBytes})
+	ctx.Prefix = ""
+	ctx.IdAttribute = ""
+	ctx.Canonicalizer = dsig.MakeC14N10RecCanonicalizer()
 	signedElement, err := ctx.SignEnveloped(doc.Root())
 	if err != nil {
 		log.Fatalf("failed to sign payload: %v", err)

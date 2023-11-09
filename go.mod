@@ -3,7 +3,6 @@ module github.com/akkahshh24/xk6-output-influxdb
 go 1.19
 
 require (
-	github.com/akkahshh24/go-xml-signer v0.0.0-20231026054539-21d3455fab2b
 	github.com/beevik/etree v1.2.0
 	github.com/brianvoe/gofakeit/v6 v6.24.0
 	github.com/influxdata/influxdb-client-go/v2 v2.12.2
